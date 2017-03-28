@@ -4,62 +4,96 @@
     <meta charset="utf-8">
     <title>Sprawdzian - Canvas</title>
     <link rel="stylesheet" href="style.css">
+
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
     <script>
     function start(){
       ctx.moveTo(500,250);
+      var rozmiarSnake = 5;
+      var score = 0;
+        var loop = 0;
+      //setFood();
       console.log("Snake: Ustaw na srodku 'x: 500' & 'y: 250'");
-
     }
 
+
+    function lose(){
+      clearInterval(loop);
+      ctx.fillStyle="#FFFFFF";
+      ctx.clearRect(0, 0, c.width, c.height);
+      location.reload(); // Do zmiany nie moze tak działac
+    }
+
+    function checkCollision(){
+      var snakeHeadX = $('#posX').val();
+      var snakeHeadY = $('#posY').val();
+      if(snakeHeadX >= canvasWidth || snakeHeadX < 0)
+      {
+        //clearInterval(loop);
+        lose();
+        console.log("Przegrales po osi X");
+      }
+      if(snakeHeadY >= canvasHeight || snakeHeadY < 0)
+      {
+        //clearInterval(loop);
+        lose();
+        console.log("Przegrales po osi Y");
+      }
+    }
     function gameLoop(){
-      setInterval(function(){
+     loop = setInterval(function(){
         moveSnake($('#OstatniKierunek').val());
+        checkCollision();
+
+
+
           console.log("Pozycja glowy weza: (" + $('#posX').val() + ", " + $('#posY').val()+")");
       },16
     );
     }
-    function moveSnake(kierunek){
 
+
+    /////http://jsdn.pl/wip-html5-canvas-snake-w-javascript/
+    function moveSnake(kierunek){
       if(kierunek == 'up'){
         $('#posY').val(parseInt($('#posY').val())-1);
+        ctx.lineTo($('#posX').val(),$('#posY').val());
+        ctx.stroke();
       }
       if(kierunek == 'down'){
         $('#posY').val(parseInt($('#posY').val())+1);
+        ctx.lineTo($('#posX').val(),$('#posY').val());
+        ctx.stroke();
       }
       if(kierunek == 'left'){
         $('#posX').val(parseInt($('#posX').val())-1);
+        ctx.lineTo($('#posX').val(),$('#posY').val());
+        ctx.stroke();
       }
       if(kierunek == 'right'){
-        $('#posX').val(parseInt($('#posX').val())+1);
+      $('#posX').val(parseInt($('#posX').val())+1);
+        ctx.lineTo($('#posX').val(),$('#posY').val());
+        ctx.stroke();
       }
-
     }
-
-
-
-
-
 
       $(document).keydown(function(e) {
       var key= e.which;
       kierunek = '';
-          if(key == 38) { // Klawisz do góry
+          if(key == 38 && $('#OstatniKierunek').val() != 'down') { // Klawisz do góry
               kierunek = 'up';
                 $('#OstatniKierunek').val('up');
-          }else if(key == 40){ // Klawisz w dół
+          }else if(key == 40 && $('#OstatniKierunek').val() != 'up'){ // Klawisz w dół
             kierunek = 'down';
               $('#OstatniKierunek').val('down');
-          }else if(key == 37){ // Klawisz w lewo
+          }else if(key == 37 && $('#OstatniKierunek').val() != 'right'){ // Klawisz w lewo
             kierunek = 'left';
               $('#OstatniKierunek').val('left');
-          }else if(key == 39){ // Klawisz w prawo
+          }else if(key == 39 && $('#OstatniKierunek').val() != 'left'){ // Klawisz w prawo
             kierunek = 'right';
               $('#OstatniKierunek').val('right');
           }
-
-
       });
       </script>
   </head>
@@ -69,8 +103,8 @@
     <canvas id="myCanvas" width="1000" height="500" style="border:1px solid #000000;">
   </canvas>
 
-  <input type="hidden" id="posX" value="0">
-  <input type="hidden" id="posY" value="0">
+  <input type="hidden" id="posX" value="500">
+  <input type="hidden" id="posY" value="250">
   <input type="text" id='OstatniKierunek' value="0">
   <button type="button" name="button" onclick="gameLoop()">Start</button>
 </center>
@@ -84,7 +118,8 @@
   <script>
   var c = document.getElementById('myCanvas');
   var ctx = c.getContext("2d");
+  var canvasWidth = $("#myCanvas").width();
+	var canvasHeight = $("#myCanvas").height();
   start();
-
   </script>
 </html>
