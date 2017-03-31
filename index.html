@@ -8,63 +8,160 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
     <script>
+    var score = 0;
+    var loop = 0;
+    var length = 5; // dlugosc snake'a
+    var snake = [];
+    var snakeSize = 10;
+    var food;
     function start(){
-      ctx.moveTo(500,250);
-      var rozmiarSnake = 5;
-      var score = 0;
-        var loop = 0;
-      //setFood();
-      console.log("Snake: Ustaw na srodku 'x: 500' & 'y: 250'");
+      //ctx.moveTo(500,250);
+      createFood();
+      for (var i = length; i>=0; i--) {
+            snake.push({x:i, y:0});
+        }
+
     }
-
-
     function lose(){
       clearInterval(loop);
       ctx.fillStyle="#FFFFFF";
       ctx.clearRect(0, 0, c.width, c.height);
-      location.reload(); // Do zmiany nie moze tak działac
+      location.reload();
     }
-
     function checkCollision(){
       var snakeHeadX = $('#posX').val();
       var snakeHeadY = $('#posY').val();
       if(snakeHeadX >= canvasWidth || snakeHeadX < 0)
       {
-        //clearInterval(loop);
         lose();
-        console.log("Przegrales po osi X");
       }
       if(snakeHeadY >= canvasHeight || snakeHeadY < 0)
       {
-        //clearInterval(loop);
         lose();
-        console.log("Przegrales po osi Y");
       }
     }
-    function gameLoop(){
-     loop = setInterval(function(){
-        moveSnake($('#OstatniKierunek').val());
-        checkCollision();
 
+    var createFood = function() {
+          food = {
+            //Generate random numbers.
+            x: Math.floor((Math.random() * 75) + 1),
+            y: Math.floor((Math.random() * 35) + 1)
+        }
+        console.log(food.x + "," + food.y);
 
+        //Look at the position of the snake’s body.
+        for (var i=0; i>snake.length; i++) {
+            var snakeX = snake[i].x;
+            var snakeY = snake[i].y;
 
-          console.log("Pozycja glowy weza: (" + $('#posX').val() + ", " + $('#posY').val()+")");
-      },16
-    );
+             if (food.x===snakeX || food.y === snakeY || food.y === snakeY && food.x===snakeX) {
+                food.x = Math.floor((Math.random() * 75) + 1);
+                food.y = Math.floor((Math.random() * 35) + 1);
+            }
+        }
     }
 
 
+    function pizza(x, y) {
+      ctx.fillStyle = 'yellow';
+      ctx.fillRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
+      // This is the single square
+      ctx.fillStyle = 'red';
+      ctx.fillRect(x*snakeSize+1, y*snakeSize+1, snakeSize-2, snakeSize-2);
+    }
+
+
+    function draw() {
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0,0,1000,500);
+      for (var i = 0; i < snake.length; i++) {
+        x = snake[i].x;
+        y = snake[i].y;
+        ctx.fillStyle = 'green';
+        ctx.fillRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
+        // This is the border of the square
+        ctx.strokeStyle = 'darkgreen';
+        ctx.strokeRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
+      }
+    }
+    var checkCollision = function(x, y, array) {
+            for(var i = 0; i < array.length; i++) {
+                if(array[i].x === x && array[i].y === y)
+                return true;
+            }
+            return false;
+        }
+    function gameLoop(){
+     loop = setInterval(function(){
+       console.log(snake);
+       var direction = $('#OstatniKierunek').val();
+       var snakeX = snake[0].x;
+       var snakeY = snake[0].y;
+       var tail = snake.pop();
+       var newHead = tail;
+       var foodX = food.x;
+       var foodY = food.y;
+       switch (direction) {
+         case 'up':
+           newHead.x = snake[0].x;
+           newHead.y = snake[0].y-1;
+           break;
+        case 'down':
+          newHead.x = snake[0].x;
+          newHead.y = snake[0].y+1;
+          break;
+        case 'right':
+            newHead.x = snake[0].x+1;
+            newHead.y = snake[0].y;
+          break;
+        case 'left':
+              newHead.x = snake[0].x-1;
+              newHead.y = snake[0].y;
+          break;
+         default:
+
+       }
+       if(newHead.x == foodX && newHead.y == foodY){
+
+         snake.push(tail);
+
+         createFood();
+       }else {
+
+       }
+
+
+       if(newHead.x == -1 || newHead.y == -1 || newHead.x == canvasWidth / snakeSize || newHead.y == canvasHeight / snakeSize || checkCollision(newHead.x, newHead.y, snake)){
+         //lose();
+       }
+
+
+      snake.unshift(newHead);
+
+       draw();
+
+
+       pizza(foodX, foodY);
+
+
+
+        //moveSnake($('#OstatniKierunek').val());
+        //checkCollision();
+          //console.log("Pozycja glowy weza: (" + $('#posX').val() + ", " + $('#posY').val()+")");
+      },80
+    );
+    }
     /////http://jsdn.pl/wip-html5-canvas-snake-w-javascript/
     function moveSnake(kierunek){
       if(kierunek == 'up'){
         $('#posY').val(parseInt($('#posY').val())-1);
-        ctx.lineTo($('#posX').val(),$('#posY').val());
-        ctx.stroke();
+      //  ctx.lineTo($('#posX').val(),$('#posY').val());
+      //  ctx.stroke();
       }
       if(kierunek == 'down'){
         $('#posY').val(parseInt($('#posY').val())+1);
-        ctx.lineTo($('#posX').val(),$('#posY').val());
-        ctx.stroke();
+      //  ctx.lineTo($('#posX').val(),$('#posY').val());
+        //ctx.stroke();
       }
       if(kierunek == 'left'){
         $('#posX').val(parseInt($('#posX').val())-1);
@@ -73,11 +170,10 @@
       }
       if(kierunek == 'right'){
       $('#posX').val(parseInt($('#posX').val())+1);
-        ctx.lineTo($('#posX').val(),$('#posY').val());
-        ctx.stroke();
+      //  ctx.lineTo($('#posX').val(),$('#posY').val());
+        //ctx.stroke();
       }
     }
-
       $(document).keydown(function(e) {
       var key= e.which;
       kierunek = '';
