@@ -4,56 +4,44 @@
     <meta charset="utf-8">
     <title>Sprawdzian - Canvas</title>
     <link rel="stylesheet" href="style.css">
-
+<link href="https://fonts.googleapis.com/css?family=Palanquin+Dark" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 
     <script>
+
     var score = 0;
     var loop = 0;
-    var length = 5; // dlugosc snake'a
+    var length = 3; // dlugosc snake'a
     var snake = [];
     var snakeSize = 10;
     var food;
+    var spacja = false;
+
+
     function start(){
-      //ctx.moveTo(500,250);
       createFood();
       for (var i = length; i>=0; i--) {
-            snake.push({x:i, y:0});
-        }
+              snake.push({x:i, y:0});
+          }
+          ctx.fillStyle = '#34495e';
+       ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-    }
-    function lose(){
-      clearInterval(loop);
-      ctx.fillStyle="#FFFFFF";
-      ctx.clearRect(0, 0, c.width, c.height);
-      location.reload();
-    }
-    function checkCollision(){
-      var snakeHeadX = $('#posX').val();
-      var snakeHeadY = $('#posY').val();
-      if(snakeHeadX >= canvasWidth || snakeHeadX < 0)
-      {
-        lose();
-      }
-      if(snakeHeadY >= canvasHeight || snakeHeadY < 0)
-      {
-        lose();
-      }
+       //Give it a border.
+    //   ctx.strokeStyle = '#bdc3c7';
+    //   ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
     }
 
     var createFood = function() {
           food = {
-            //Generate random numbers.
+            // Generujemy losowe liczby, które będą wspolrzednymi jedzenia naszego snake'a
             x: Math.floor((Math.random() * 75) + 1),
             y: Math.floor((Math.random() * 35) + 1)
         }
-        console.log(food.x + "," + food.y);
+        console.log(food.x + ", " + food.y);
 
-        //Look at the position of the snake’s body.
         for (var i=0; i>snake.length; i++) {
             var snakeX = snake[i].x;
             var snakeY = snake[i].y;
-
              if (food.x===snakeX || food.y === snakeY || food.y === snakeY && food.x===snakeX) {
                 food.x = Math.floor((Math.random() * 75) + 1);
                 food.y = Math.floor((Math.random() * 35) + 1);
@@ -61,29 +49,19 @@
         }
     }
 
-
     function pizza(x, y) {
-      ctx.fillStyle = 'yellow';
+
+      //Wypełenienie jedznia
+      ctx.fillStyle = '#c0392b';
       ctx.fillRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
-      // This is the single square
-      ctx.fillStyle = 'red';
+
+      //Border jedzenia
+      ctx.fillStyle = '#f1c40f';
       ctx.fillRect(x*snakeSize+1, y*snakeSize+1, snakeSize-2, snakeSize-2);
     }
 
 
-    function draw() {
-      ctx.fillStyle = 'white';
-      ctx.fillRect(0,0,1000,500);
-      for (var i = 0; i < snake.length; i++) {
-        x = snake[i].x;
-        y = snake[i].y;
-        ctx.fillStyle = 'green';
-        ctx.fillRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
-        // This is the border of the square
-        ctx.strokeStyle = 'darkgreen';
-        ctx.strokeRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
-      }
-    }
+      //Sprawdzanie kolizji
     var checkCollision = function(x, y, array) {
             for(var i = 0; i < array.length; i++) {
                 if(array[i].x === x && array[i].y === y)
@@ -91,87 +69,109 @@
             }
             return false;
         }
+        //Score - zlicza ile "pizzy" zjadł już nasz snake
+        var scoreText = function() {
+
+                var score_text = "Score: " + score;
+                ctx.fillStyle = '#3498db';
+                ctx.fillText(score_text, 10, canvasHeight-5);
+            }
+        var bodySnake = function(x, y) {
+               //Wypełenie jednego kwadracika snake'a
+               ctx.fillStyle = '#2ecc71';
+               ctx.fillRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
+               //Border snake'a
+               ctx.strokeStyle = '#27ae60';
+               ctx.strokeRect(x*snakeSize, y*snakeSize, snakeSize, snakeSize);
+           }
+
+         /////////////////////////////////////////
+         //////    GŁÓWNA FUNKCJA GRY =D ////////
+         ////////////////////////////////////////
     function gameLoop(){
-     loop = setInterval(function(){
+     var gameloop = setInterval(function(){
+       ctx.fillStyle = '#34495e';
+    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+    //Give it a border.
+  //  ctx.strokeStyle = '#bdc3c7';  //#34495e
+  //  ctx.strokeRect(0, 0, canvasWidth, canvasHeight);
        console.log(snake);
        var direction = $('#OstatniKierunek').val();
        var snakeX = snake[0].x;
        var snakeY = snake[0].y;
-       var tail = snake.pop();
-       var newHead = tail;
        var foodX = food.x;
        var foodY = food.y;
        switch (direction) {
          case 'up':
-           newHead.x = snake[0].x;
-           newHead.y = snake[0].y-1;
+           snakeY--;
            break;
         case 'down':
-          newHead.x = snake[0].x;
-          newHead.y = snake[0].y+1;
+          snakeY++;
           break;
         case 'right':
-            newHead.x = snake[0].x+1;
-            newHead.y = snake[0].y;
+            snakeX++;
           break;
         case 'left':
-              newHead.x = snake[0].x-1;
-              newHead.y = snake[0].y;
+              snakeX--;
           break;
          default:
-
        }
-       if(newHead.x == foodX && newHead.y == foodY){
 
-         snake.push(tail);
-
-         createFood();
-       }else {
-
+       if(snakeX == -1 || snakeY == -1 || snakeX == canvasWidth / snakeSize || snakeY == canvasHeight / snakeSize || checkCollision(snakeX, snakeY, snake)){
+         ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+         gameloop = clearInterval(gameLoop);
+         location.reload();
+        return;
        }
 
 
-       if(newHead.x == -1 || newHead.y == -1 || newHead.x == canvasWidth / snakeSize || newHead.y == canvasHeight / snakeSize || checkCollision(newHead.x, newHead.y, snake)){
-         //lose();
-       }
+
+       if (snakeX == food.x && snakeY == food.y) {
+       //Create a new square instead of moving the tail.
+       var tail = {
+           x: snakeX,
+           y: snakeY
+       };
+      score++;
+
+       //Create new food.
+       createFood();
+   } else {
+
+       //Pop out the last cell.
+       var tail = snake.pop();
+       tail.x = snakeX;
+       tail.y = snakeY;
+   }
+
+   //Puts the tail as the first cell.
+   snake.unshift(tail);
 
 
-      snake.unshift(newHead);
-
-       draw();
-
-
+      // draw();
+      for (var i = 0; i < snake.length; i++) {
+       bodySnake(snake[i].x, snake[i].y);
+   }
        pizza(foodX, foodY);
-
-
-
-        //moveSnake($('#OstatniKierunek').val());
-        //checkCollision();
-          //console.log("Pozycja glowy weza: (" + $('#posX').val() + ", " + $('#posY').val()+")");
+       scoreText();
       },80
     );
     }
-    /////http://jsdn.pl/wip-html5-canvas-snake-w-javascript/
+
+
     function moveSnake(kierunek){
       if(kierunek == 'up'){
         $('#posY').val(parseInt($('#posY').val())-1);
-      //  ctx.lineTo($('#posX').val(),$('#posY').val());
-      //  ctx.stroke();
       }
       if(kierunek == 'down'){
         $('#posY').val(parseInt($('#posY').val())+1);
-      //  ctx.lineTo($('#posX').val(),$('#posY').val());
-        //ctx.stroke();
       }
       if(kierunek == 'left'){
         $('#posX').val(parseInt($('#posX').val())-1);
-        ctx.lineTo($('#posX').val(),$('#posY').val());
-        ctx.stroke();
       }
       if(kierunek == 'right'){
       $('#posX').val(parseInt($('#posX').val())+1);
-      //  ctx.lineTo($('#posX').val(),$('#posY').val());
-        //ctx.stroke();
       }
     }
       $(document).keydown(function(e) {
@@ -189,21 +189,37 @@
           }else if(key == 39 && $('#OstatniKierunek').val() != 'left'){ // Klawisz w prawo
             kierunek = 'right';
               $('#OstatniKierunek').val('right');
+          }else if(key == 32 && spacja == false){
+            spacja = true;
+            gameLoop();
           }
       });
       </script>
   </head>
-  <body>
-
+  <body style="background-color:#2c3e50;">
+      <div class="titleBox">
+        <div class="titleBox2">
+          <div class="box"><span class="literek">S</span></div>
+          <div class="box"><span class="literek">N</span></div>
+          <div class="box"><span class="literek">A</span></div>
+          <div class="box"><span class="literek">K</span></div>
+          <div class="box"><span class="literek">E</span></div>
+      </div>
+    </div>
   <center>
-    <canvas id="myCanvas" width="1000" height="500" style="border:1px solid #000000;">
+    <canvas id="myCanvas" width="1000" height="500" style="box-shadow: 0 1px 2px 0 rgba(0,0,0,0.19);">
   </canvas>
 
   <input type="hidden" id="posX" value="500">
   <input type="hidden" id="posY" value="250">
-  <input type="text" id='OstatniKierunek' value="0">
-  <button type="button" name="button" onclick="gameLoop()">Start</button>
+  <input type="hidden" id='OstatniKierunek' value="right">
 </center>
+    <div class="howTo">
+      <span class="literek2">Aby rozpocząć grę naciśnij "spacje"</span>
+    </div>
+<div class="footer">
+<span class="literek2">Snake V.32 <br/> Stworzone przez:</span>
+</div>
 
   </body>
 
